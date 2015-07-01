@@ -59,7 +59,7 @@ namespace blox
 				1.0f, -1.0f, -1.0f
 		});
 
-		// Setup indices
+		// Setup normals
 		m_vertices.getAttributeList(1).write<float, 3>(GL_STATIC_DRAW, GL_FLOAT,
 		{
 				// Front face
@@ -158,11 +158,10 @@ namespace blox
 
 	void Cube::update(fuel::Game &game, float dt)
 	{
-		m_transform.getRotation().y += dt * 180.0f;
-
-		glm::vec3 minScale(0.25f, 0.25f, 0.25f);
-		glm::vec3 maxScale(1.50f, 1.50f, 1.50f);
-		m_transform.setScale(minScale + (maxScale - minScale) * (1 + sinf(glfwGetTime())) / 2.0f);
+		//m_transform.getRotation().y += dt * 180.0f;
+		glm::vec3 minScale(0.10f, 1.00f, 0.10f);
+		glm::vec3 maxScale(1.00f, 0.10f, 1.00f);
+		//m_transform.setScale(minScale + (maxScale - minScale) * (1 + sinf(glfwGetTime())) / 2.0f);
 	}
 
 	void Cube::geometryPass(fuel::Game &game)

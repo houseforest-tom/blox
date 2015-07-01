@@ -1,33 +1,49 @@
 #version 400 core
 
 //GBuffer textures
-uniform sampler2D uDiffuseTexture;
-uniform sampler2D uNormalTexture;
+uniform sampler2D uGBufferDiffuse;
+uniform sampler2D uGBufferNormal;
+uniform sampler2D uGBufferDepth;
+
+//Shadow map for this light
+uniform sampler2D uShadowMap;
 
 //Directional light characteristics
-uniform vec3 uColor;
-uniform vec3 uDirection;
+uniform struct DirectionalLight
+{
+	vec3 direction;
+	vec3 color;
+} uDirectionalLight;
 
-//Input: Texture coordinates received from vertex shader
+//Texture coordinates received from vertex shader
 in vec2 fTexCoord;
 
-//Output: Pixel color
+//Pixel color
 out vec4 pColor;
 
+//Zero if inside shadow, 1 if not
+float getShadowFactor()
+{	
+	//No shadows yet
+	return 1.0f;
+}
+
+//Calculate intensity based on dot product between normal & light direction
 float getIntensity()
 {
 	//Surface normal
-	vec3 normal = normalize(texture(uNormalTexture, fTexCoord).xyz);
-	return max(0.0f, dot(uDirection, -normal));
+	vec3 normal = normalize(texture(uGBufferNormal, fTexCoord).xyz);
+	return max(0.0f, dot(uDirectionalLight.direction, -normal));
 }
 
+//Multiply light color with diffuse texture color
 vec3 getColor()
 {
 	//Return product of diffuse and light color
-	return uColor * texture(uDiffuseTexture, fTexCoord).rgb;
+	return uDirectionalLight.color * texture(uGBufferDiffuse, fTexCoord).rgb;
 }
 
 void main( void )
 {	
-	pColor = vec4(getIntensity() * getColor(), 1.0f);
+	pColor = vec4(getShadowFactor() * getIntensity() * getColor(), 1.0f);
 }

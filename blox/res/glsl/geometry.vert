@@ -27,7 +27,7 @@ out vec2 fTexCoord;
 void main( void )
 {
 	gl_Position = uWVP * vec4(vPosition, 1.0f);
-	fPosition = (uWorld * vec4(vPosition, 1.0f)).xyz;
+	fPosition = (uWVP * vec4(vPosition, 1.0f)).xyz;
 	fNormal = (uWorld * vec4(vNormal, 0.0f)).xyz;
 	fTexCoord = vTexCoord;
 }
