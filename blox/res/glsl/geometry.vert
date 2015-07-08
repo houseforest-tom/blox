@@ -1,9 +1,7 @@
 #version 400 core
 
-//Uniform: WorldViewProjection matrix
+//Uniform: World-View-Projection matrix
 uniform mat4 uWVP;
-
-//Uniform: World matrix
 uniform mat4 uWorld;
 
 //Input: Vertex position
@@ -15,7 +13,7 @@ in vec3 vNormal;
 //Input: Vertex texture coordinates
 in vec2 vTexCoord;
 
-//Output: World space position
+//Output: Clip space position
 out vec3 fPosition;
 
 //Output: World space normal

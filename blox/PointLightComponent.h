@@ -30,7 +30,7 @@ namespace blox
 
 		void update(fuel::Game &game, float dt) override
 		{
-			position.x = sinf(glfwGetTime()) * 3.0f;
+			//position.x = sinf(glfwGetTime()) * 3.0f;
 		}
 
 		void fullscreenPass(fuel::Game &game) override

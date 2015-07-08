@@ -7,19 +7,20 @@
  *****************************************************************/
 
 #include <fuel/core/Game.h>
+#include <fuel/core/GameComponent.h>
 #include "PointLightComponent.h"
-#include "Cube.h"
+#include "WaterSurface.h"
 
 namespace blox
 {
 	class EngineTest : public fuel::Game, public fuel::GameComponent
 	{
 	private:
-		// Cubes
-		vector<shared_ptr<Cube>> m_cubes;
-
 		// Point lights
-		vector<shared_ptr<PointLightComponent>> m_pointLights;
+		std::vector<std::shared_ptr<PointLightComponent>> m_pointLights;
+
+		// Water surface
+		std::shared_ptr<fuel::WaterSurface> m_water;
 
 		/**
 		 * Load all GLSL shader resources.
@@ -82,16 +83,17 @@ namespace blox
 				sh.bindVertexAttribute(1, "vTexCoord");
 				sh.link();
 				sh.registerUniform("uViewProjection");
+				sh.registerUniform("uInverseViewProjection");
 				sh.registerUniform("uCameraPosition");
 				sh.registerUniform("uGBufferDiffuse");
-				sh.registerUniform("uGBufferPosition");
 				sh.registerUniform("uGBufferNormal");
+				sh.registerUniform("uGBufferDepth");
 				sh.registerUniform("uPointLight.position");
 				sh.registerUniform("uPointLight.color");
 				sh.registerUniform("uPointLight.radius");
 				sh.getUniform("uGBufferDiffuse").set(0);
-				sh.getUniform("uGBufferPosition").set(1);
-				sh.getUniform("uGBufferNormal").set(2);
+				sh.getUniform("uGBufferNormal").set(1);
+				sh.getUniform("uGBufferDepth").set(2);
 			}
 		}
 
@@ -116,19 +118,12 @@ namespace blox
 			// Load textures
 			loadTextures();
 
-			// Setup cubes
-			for(unsigned cubeNum = 0; cubeNum < 64; ++cubeNum)
-			{
-				m_cubes.push_back(make_shared<Cube>());
-				m_cubes.back()->getTransform().setPosition({RANDF(-15, 15), RANDF(-15, 15), RANDF(-15, 0)});
-
-				char name[16];
-				sprintf(name, "cube%05u", cubeNum);
-				addChild(string(name), m_cubes.back());
-			}
+			// Setup water
+			m_water = std::make_shared<fuel::WaterSurface>(4);
+			addChild("water", m_water);
 
 			// Setup point lights
-			m_pointLights.push_back(make_shared<PointLightComponent>(glm::vec3(0, 0, 0), glm::vec3(1, 0, 0), 1.5f));
+			m_pointLights.push_back(std::make_shared<PointLightComponent>(glm::vec3(0, 0, 0), glm::vec3(1, 0, 0), 5.0f));
 			addChild("pointlight", m_pointLights.back());
 
 			// Move camera
@@ -140,7 +135,9 @@ namespace blox
 
 		void update(Game &game, float dt) override
 		{
-			game.getShaderManager().get("pointlight").getUniform("uViewProjection").set(game.calculateViewProjectionMatrix());
+			glm::mat4 viewProj = game.calculateViewProjectionMatrix();
+			game.getShaderManager().get("pointlight").getUniform("uViewProjection").set(viewProj);
+			game.getShaderManager().get("pointlight").getUniform("uInverseViewProjection").set(glm::inverse(viewProj));
 			game.getShaderManager().get("pointlight").getUniform("uCameraPosition").set(game.getCamera().getTransform().getPosition());
 
 			GameComponent::update(game, dt); //update children

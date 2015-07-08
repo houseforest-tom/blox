@@ -1,10 +1,5 @@
 #version 400 core
 
-//Billboard effect
-const float cBillboardRadius = 0.0625f;
-const float cAspectRatio = 16.0f / 9.0f;
-const float cCameraMaxDistance = 16.0f;
-
 //ViewProjection matrices
 uniform mat4 uViewProjection;
 uniform mat4 uInverseViewProjection;
@@ -14,8 +9,8 @@ uniform vec3 uCameraPosition;
 
 //GBuffer textures
 uniform sampler2D uGBufferDiffuse;
-uniform sampler2D uGBufferPosition;
 uniform sampler2D uGBufferNormal;
+uniform sampler2D uGBufferDepth;
 
 //Point light characteristics
 struct PointLight
@@ -34,8 +29,14 @@ out vec4 pColor;
 
 float getIntensity( void )
 {
+	float depth = texture(uGBufferDepth, fTexCoord).x * 2.0f - 1.0f;
+	vec3 viewPosition = vec3(fTexCoord * 2.0f - 1.0f, depth);
+	vec4 worldPosition = uInverseViewProjection * vec4(viewPosition, 1.0f);
+	worldPosition.xyz /= worldPosition.w;
+
 	//Offset vector from light source
-	vec3 offset = uPointLight.position - texture(uGBufferPosition, fTexCoord).xyz;
+	vec3 offset = uPointLight.position - worldPosition.xyz;
+
 	//Distance from light to camera
 	float distance = length(offset);
 	if(distance > uPointLight.radius) discard;
@@ -57,18 +58,4 @@ vec3 getColor( void )
 void main( void )
 {
 	pColor = vec4(getColor() * getIntensity(), 1.0f);
-
-	//Billboard
-	vec4  clipSpaceLightPos   = (uViewProjection * vec4(uPointLight.position, 1.0f));
-	vec3  screenSpaceLightPos = clipSpaceLightPos.xyz / clipSpaceLightPos.w;
-		 screenSpaceLightPos.y /= cAspectRatio;
-	vec2  screenSpaceTexCoord = 2.0f * fTexCoord - 1.0f;
-		 screenSpaceTexCoord.y /= cAspectRatio;
-	float screenSpaceDistance = length(screenSpaceLightPos.xy - screenSpaceTexCoord);
-	
-	float cameraDistance     = length(uCameraPosition - uPointLight.position);
-	float adaptedBillboardSz = cBillboardRadius * (1.0f - cameraDistance / cCameraMaxDistance);
-
-	if(screenSpaceDistance <= adaptedBillboardSz )
-		pColor += vec4(uPointLight.color * (1.0f - screenSpaceDistance / adaptedBillboardSz ), 1.0f);
 }

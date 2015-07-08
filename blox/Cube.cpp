@@ -158,10 +158,7 @@ namespace blox
 
 	void Cube::update(fuel::Game &game, float dt)
 	{
-		//m_transform.getRotation().y += dt * 180.0f;
-		glm::vec3 minScale(0.10f, 1.00f, 0.10f);
-		glm::vec3 maxScale(1.00f, 0.10f, 1.00f);
-		//m_transform.setScale(minScale + (maxScale - minScale) * (1 + sinf(glfwGetTime())) / 2.0f);
+		GameComponent::update(game, dt);
 	}
 
 	void Cube::geometryPass(fuel::Game &game)
