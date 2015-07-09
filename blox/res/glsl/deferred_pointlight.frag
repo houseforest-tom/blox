@@ -1,5 +1,8 @@
 #version 400 core
 
+//Falloff
+const float cFalloff = 5.0f;
+
 //ViewProjection matrices
 uniform mat4 uViewProjection;
 uniform mat4 uInverseViewProjection;
@@ -44,7 +47,7 @@ float getIntensity( void )
 	//Surface normal
 	vec3 normal = normalize(texture(uGBufferNormal, fTexCoord).xyz);
 
-	float i = 1.0f - distance / uPointLight.radius;
+	float i = exp(-distance / uPointLight.radius * cFalloff);
 	i *= dot(offset, normal);
 	return max(i, 0.0f);
 }

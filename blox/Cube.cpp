@@ -12,7 +12,7 @@
 namespace blox
 {
 	Cube::Cube(void)
-		:m_textureName("grass"),
+		:m_textureName("Grass"),
 		 m_vertices(3),
 		 m_indices(GL_ELEMENT_ARRAY_BUFFER),
 		 m_transform()
@@ -158,6 +158,7 @@ namespace blox
 
 	void Cube::update(fuel::Game &game, float dt)
 	{
+		m_transform.getRotation().y += dt * 90.0f;
 		GameComponent::update(game, dt);
 	}
 
@@ -165,8 +166,9 @@ namespace blox
 	{
 		auto world = m_transform.calculateWorldMatrix();
 		fuel::GLTexture::bind(0, game.getTextureManager().get(m_textureName));
-		game.getShaderManager().get("textured").getUniform("uWorld").set(world);
-		game.getShaderManager().get("textured").getUniform("uWVP").set(game.calculateViewProjectionMatrix() * world);
+		game.getShaderManager().get("DeferredPositionNormalTexcoord").use();
+		game.getShaderManager().get("DeferredPositionNormalTexcoord").getUniform("uWorld").set(world);
+		game.getShaderManager().get("DeferredPositionNormalTexcoord").getUniform("uWVP").set(game.calculateViewProjectionMatrix() * world);
 		game.getWindow().renderGeometry<uint16_t>(m_vertices, m_indices, GL_UNSIGNED_SHORT);
 	}
 }

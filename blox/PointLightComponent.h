@@ -35,7 +35,7 @@ namespace blox
 
 		void fullscreenPass(fuel::Game &game) override
 		{
-			auto &pointlightShader = game.getShaderManager().get("pointlight");
+			auto &pointlightShader = game.getShaderManager().get("DeferredPointlight");
 			pointlightShader.use();
 			pointlightShader.getUniform("uPointLight.position").set(position);
 			pointlightShader.getUniform("uPointLight.color").set(color);
